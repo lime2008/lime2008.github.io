@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="format-detection" content="telephone=no" />
+        <meta http-equiv="x-dns-prefetch-control" content="on">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <title> </title>
+        <script type="text/javascript">
+           
+                var baseWidth = 750;
+                var html = document.documentElement;
+                var webSetFont = 1;
+                try {
+                    webSetFont = getComputedStyle(document.documentElement, false).fontSize;
+                    webSetFont = parseFloat(webSetFont) / 16;
+                } catch (e) {}
+                var grids = baseWidth / 100;
+                var recalc = function () {
+                    var clientWidth = window.screen.width || html.clientWidth || 375;
+                    // 修复安卓分屏下横竖屏切换bug
+                    if(document.body && document.body.clientWidth){
+                        clientWidth = document.body.clientWidth;
+                    }
+                    html.style.fontSize = clientWidth / grids / webSetFont + 'px';
+                    console.log('fontSize:', window.innerWidth, html.clientWidth);
+                };
+                if (document.addEventListener) {
+                    var resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
+                    window.addEventListener(resizeEvt, recalc, false);
+                    document.addEventListener('DOMContentLoaded', recalc, false);
+                }
+                recalc();
+        </script>
+        <link rel="stylesheet" type="text/css" href="//i.qianbao.qq.com/redpackets2023/dist/css/coupon.css?_bid=5359&v=6&max_age=2592000&_discheck=1">
+    </head>
+    <!--过期页，已使用页body加unable属性-->
+    <body ontouchstart="" class="">
+        <script>
+            var ua = navigator.userAgent;
+            var isTablet = /(?:iPad|PlayBook)/.test(ua) || (/(?:Android)/.test(ua) && !/(?:Mobile)/.test(ua))
+            document.body.classList.add(ua.indexOf('Android') > -1 ? 'Android' : 'iOS');
+            isTablet && document.body.classList.add('Tablet');
+        </script>
+        <div class="errorWrap" style="display: none;" id="errorWrap" >
+            <div class="errorIcon"></div>
+            <p class="errorText" id="errorText">卡券不存在</p>
+        </div>
+        <div class="dataWrap"  id="dataWrap">
+            <div class="overlay"></div>
+            <div class="bg">
+                <div id="bg" class="bgc"></div>
+            </div>
+            <div class="detailBox" id="detailBox">
+                <div class="advTag"></div>
+                <div class="logoOuterBox">
+                    <div class="logoInnerBox" id="logoInnerBox">
+                        <div class="logo" id="logo" >
+                            <div class="logoCover" ></div>
+                        </div>
+                    </div>
+                    <div class="brandNameBox" id="brandNameBox">
+                        <p class="brandName" id="biz"></p>
+                    </div>
+                </div>
+                <div class="couponsMessageBox">
+                    <div class="textureBox">
+                        <p class="couponsName oneLine" id="name"></p>
+                        <p class="subTip oneLine" id="extTxt"></p>
+                        <div class="buttonBox" id="buttonBox">
+                            <p class="button" id="button"></p>
+                        </div>
+                        <p class="goodFortune" id="goodFortune"></p>
+                        <div class="bottomBox">
+                            <p class="expiredText" id="expiredText"></p>
+                            <div class="ruleButtonBox" id="ruleButton">
+                                <p class="ruleButton" >使用规则<div id="arrow" class="arrow rotateArrow"></div></p>
+                            </div>
+                        </div>
+                        <div class="ruleBox" id="ruleBox">
+
+                        </div>
+
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        <script src="//pub.idqqimg.com/qqmobile/qqapi.wk.js?_bid=152&max_age=2592000&_discheck=1"></script>
+        <script src="//i.qianbao.qq.com/redpackets2023/upSource/dist/js/common.js?_bid=5319&v=6&max_age=2592000&_discheck=1"></script>
+        
+        <script>
+            var getCookie = function(name) {
+                var re = new RegExp(`(?:^|;+|\\s+)${name}=([^;]*)`);
+                var result = document.cookie.match(re);
+                return (!result ? '' : result[1]);
+            };
+            var uin = getCookie('uin').replace(/o0*/,'');
+
+            window.aegis = new Aegis({
+                id: 'nGKJaHKO20GxbgE3n7',
+                hostUrl: 'https://rumt-zh.com',
+                uin: uin,
+                reportApiSpeed: false,
+                reportAssetSpeed: true,
+                spa: true,
+            })
+        </script>
+        <script src="//i.qianbao.qq.com/redpackets2023/js/coupon-packs-1.0.js?_bid=5320&v=7&max_age=2592000&_discheck=1"></script>
+        <script>
+            function addCard(){
+                config_packs["11399"] = {
+                    "name": "鹅毛专属福利等你领",
+                    "valid": "有效期至2023-03-01 23:59:59",
+                    "biz": "王者荣耀",
+                    "extTxt": "抢先预约，福利不错过！",
+                    "rule": "<li>1、卡券领取后存入QQ钱包的卡券中；</li><li>2、使用方法：用户可通过卡券参与预约活动，成功订阅后将在1月21日0点-22日23点期间通过私人助手/QQ提醒/系统日历向你推送提醒。若已开启了日历提醒，后续可以从【游戏中心】-【头像】-【设置】-【日历通知设置】关闭授权；</li><li>3、到期说明：请在2023年3月1日前领取卡券并完成兑换；</li><li>4、其他说明：游戏礼包禁止出售，无法转让、赠送他人；如因非腾讯原因导致您在本规则约定时间内未参与活动、兑换奖品或领取奖品，或由于您提供的信息不真实不完整等导致奖品无法发放或发放错误的，由您自行承担全部损失；</li><li>5、联系方式：如有疑问，请关注手机QQ公众号“腾讯客服”获取服务。</li>",
+                    "btnText": "前往查看",
+                    "lockButtonText": "我要预约",
+                    "url": {
+                        "get": "https://youxi.gamecenter.qq.com/gcact/dist/2023-spring-sale/sgame/index.html?_wv=2303971&_wwv=196996&_fv=0&_autosub_=1"
+                    },
+                    "logoName": "5f6761db30b681139d80b8cdac222607.png",
+                    "bgName": "6faef76325c291204f468ec91d1a22ad.jpg?_bid=0"
+                };
+
+                config_packs["11400"] = {
+                    "name": "鹅毛市集88点券优惠卡",
+                    "valid": "有效期至2023-02-21 23:59:59",
+                    "biz": "鹅毛市集",
+                    "extTxt": "购指定皮肤享88点券优惠",
+                    "rule": "<li>1、卡券领取后存入QQ钱包的卡券中；</li><li>2、礼包内容：鹅毛市集X王者荣耀88点券优惠卡；</li><li>3、使用方法：在鹅毛市集购买（不包含赠送）王者荣耀指定皮肤时，可抵扣88点券（8.8元）；皮肤包含：鲁班大师-归虚梦演、蒙犽-归虚梦演、上官婉儿-修竹墨客、明世隐-占星师、蔡文姬-蔷薇王座、王昭君-精灵公主、弈星-踏雪寻梅、嫦娥-露花倒影、小乔-万圣前夜、公孙离-花间舞；</li><li>4、到期说明：请在2023年2月21日前领取卡券并完成兑换；</li><li>5、其他说明：游戏礼包禁止出售，无法转让、赠送他人；如因非腾讯原因导致您在本规则约定时间内未参与活动、兑换奖品或领取奖品，或由于您提供的信息不真实不完整等导致奖品无法发放或发放错误的，由您自行承担全部损失；</li><li>6、联系方式：如有疑问，请关注手机QQ公众号“腾讯客服”获取服务。</li>",
+                    "btnText": "前往查看",
+                    "url": {
+                        "get": "https://year.gamecenter.qq.com/xgame/spring-festival/dist/2023-game-coupon/index.html?_wv=18950115&_wwv=260"
+                    },
+                    "logoName": "094323dfcbb5eb6f711e8f261db06812.png",
+                    "bgName": "a0f061367304fc017269b99d6030501e.jpg?_bid=5371"
+                };
+
+                config_packs["11401"] = {
+                    "name": "鹅毛市集178点券优惠卡",
+                    "valid": "有效期至2023-02-21 23:59:59",
+                    "biz": "鹅毛市集",
+                    "extTxt": "购指定皮肤享178点券优惠",
+                    "rule": "<li>1、卡券领取后存入QQ钱包的卡券中；</li><li>2、礼包内容：鹅毛市集X王者荣耀178点券优惠卡；</li><li>3、使用方法：在鹅毛市集购买（不包含赠送）王者荣耀指定皮肤时，可抵扣178点券（17.8元）；皮肤包含：宫本武藏-未来纪元、孙膑-天使之翼、典韦-黄金武士、刘备-汉昭烈帝、花木兰-兔女郎；</li><li>4、到期说明：请在2023年2月21日前领取卡券并完成兑换；</li><li>5、其他说明：游戏礼包禁止出售，无法转让、赠送他人；如因非腾讯原因导致您在本规则约定时间内未参与活动、兑换奖品或领取奖品，或由于您提供的信息不真实不完整等导致奖品无法发放或发放错误的，由您自行承担全部损失；</li><li>6、联系方式：如有疑问，请关注手机QQ公众号“腾讯客服”获取服务。</li>",
+                    "btnText": "前往查看",
+                    "url": {
+                        "get": "https://year.gamecenter.qq.com/xgame/spring-festival/dist/2023-game-coupon/index.html?_wv=18950115&_wwv=260"
+                    },
+                    "logoName": "094323dfcbb5eb6f711e8f261db06812.png",
+                    "bgName": "2bf44a3202dc3eb56240e93bcce4ead7.jpg?_bid=5371"
+                };
+
+                config_packs["11402"] = {
+                    "name": "鹅毛市集68点券优惠卡",
+                    "valid": "有效期至2023-02-21 23:59:59",
+                    "biz": "鹅毛市集",
+                    "extTxt": "购指定皮肤享68点券优惠",
+                    "rule": "<li>1、卡券领取后存入QQ钱包的卡券中；</li><li>2、礼包内容：鹅毛市集X王者荣耀68点券优惠卡；</li><li>3、使用方法：在鹅毛市集购买（不包含赠送）王者荣耀指定皮肤时，可抵扣68点券（6.8元）；皮肤包含：戈娅-危途狂花、瑶-森、李信-灼热之刃、澜-孤猎、曜-归虚梦演、西施-归虚梦演、百里守约-绝影神枪、貂蝉-异域舞娘、暃-碧珀绯影；</li><li>4、到期说明：请在2023年2月21日前领取卡券并完成兑换；</li><li>5、其他说明：游戏礼包禁止出售，无法转让、赠送他人；如因非腾讯原因导致您在本规则约定时间内未参与活动、兑换奖品或领取奖品，或由于您提供的信息不真实不完整等导致奖品无法发放或发放错误的，由您自行承担全部损失；</li><li>6、联系方式：如有疑问，请关注手机QQ公众号“腾讯客服”获取服务。</li>",
+                    "btnText": "前往查看",
+                    "url": {
+                        "get": "https://year.gamecenter.qq.com/xgame/spring-festival/dist/2023-game-coupon/index.html?_wv=18950115&_wwv=260"
+                    },
+                    "logoName": "094323dfcbb5eb6f711e8f261db06812.png",
+                    "bgName": "6bf288e9126bc74ada8d8e9598735e38.jpg?_bid=5371"
+                };
+
+                config_packs["11403"] = {
+                    "name": "鹅毛市集218点券优惠卡",
+                    "valid": "有效期至2023-02-21 23:59:59",
+                    "biz": "鹅毛市集",
+                    "extTxt": "购指定皮肤享218点券优惠",
+                    "rule": "<li>1、卡券领取后存入QQ钱包的卡券中；</li><li>2、礼包内容：鹅毛市集X王者荣耀218点券优惠卡；</li><li>3、使用方法：在鹅毛市集购买（不包含赠送）王者荣耀指定皮肤时，可抵扣218点券（21.8元）；皮肤包含：吕布-末日机甲、妲己-女仆咖啡、花木兰-水晶猎龙者、安琪拉-心灵骇客、阿轲-节奏热浪；</li><li>4、到期说明：请在2023年2月21日前领取卡券并完成兑换；</li><li>5、其他说明：游戏礼包禁止出售，无法转让、赠送他人；如因非腾讯原因导致您在本规则约定时间内未参与活动、兑换奖品或领取奖品，或由于您提供的信息不真实不完整等导致奖品无法发放或发放错误的，由您自行承担全部损失；</li><li>6、联系方式：如有疑问，请关注手机QQ公众号“腾讯客服”获取服务。</li>",
+                    "btnText": "前往查看",
+                    "url": {
+                        "get": "https://year.gamecenter.qq.com/xgame/spring-festival/dist/2023-game-coupon/index.html?_wv=18950115&_wwv=260"
+                    },
+                    "logoName": "094323dfcbb5eb6f711e8f261db06812.png",
+                    "bgName": "1772d2c8ac2b88fe371578614958848e.jpg?_bid=5371"
+                };
+
+                config_packs["11404"] = {
+                    "name": "鹅毛市集688点券优惠卡",
+                    "valid": "有效期至2023-02-21 23:59:59",
+                    "biz": "鹅毛市集",
+                    "extTxt": "购指定皮肤享688点券优惠",
+                    "rule": "<li>1、卡券领取后存入QQ钱包的卡券中；</li><li>2、礼包内容：鹅毛市集X王者荣耀688点券优惠卡；</li><li>3、使用方法：在鹅毛市集购买（不包含赠送）鲁班七号-电玩小子时，可抵扣688点券（68.8元）；</li><li>4、到期说明：请在2023年2月21日前领取卡券并完成兑换；</li><li>5、其他说明：游戏礼包禁止出售，无法转让、赠送他人；如因非腾讯原因导致您在本规则约定时间内未参与活动、兑换奖品或领取奖品，或由于您提供的信息不真实不完整等导致奖品无法发放或发放错误的，由您自行承担全部损失；</li><li>6、联系方式：如有疑问，请关注手机QQ公众号“腾讯客服”获取服务。</li>",
+                    "btnText": "前往查看",
+                    "url": {
+                        "get": "https://year.gamecenter.qq.com/xgame/spring-festival/dist/2023-game-coupon/index.html?_wv=18950115&_wwv=260"
+                    },
+                    "logoName": "094323dfcbb5eb6f711e8f261db06812.png",
+                    "bgName": "5f5c15b2d0a4ad6eb27959ecd36e4d36.jpg?_bid=5371"
+                };
+            }
+
+            function addCard11405(){
+                config_packs["11405"] = {
+                    "name": "享多款新皮肤优惠购",
+                    "valid": "有效期至2023-01-20 23:59:59",
+                    "biz": "王者荣耀",
+                    "extTxt": "买多省多，快来预约",
+                    "lockButtonText": "我要预约",
+                    "rule": "<li>1、卡券领取后存入QQ钱包的卡券中；</li><li>2、用户可通过卡券参与预约活动，成功订阅后将在1月21日0点-22日23点期间通过私人助手/QQ提醒/系统日历向你推送提醒，若已开启了日历提醒，后续可以从【游戏中心】-【头像】-【设置】-【日历通知设置】关闭授权；</li><li>3、联系方式：如有疑问，请关注手机QQ公众号“腾讯客服”获取服务。</li>",
+                    "btnText": "前往查看",
+                    "url": {
+                        "get": "https://youxi.gamecenter.qq.com/gcact/dist/2023-spring-sale/sgame/index.html?_wv=2303971&_wwv=229764&_fv=0&_autosub_=1"
+                    },
+                    "logoName": "5f6761db30b681139d80b8cdac222607.png",
+                    "bgName": "8ca08e08bae104cb0c86ccfd895b59a7.jpg?_bid=0"
+                }
+            }
+
+            if (config_packs) {
+                addCard();
+                addCard11405();
+            }
+        </script>
+        <script src="//i.qianbao.qq.com/redpackets2023/dist/coupon.js?_bid=5319&v=14&max_age=2592000&_discheck=1"></script>
+        <script>
+
+            // 对文件未加载的情况做提示
+            function errTip(type){
+                var msg = '当前网络繁忙<br>稍后请在QQ钱包的卡券中查看' + {qqapi:'!',packs:'~',Zepto:'。', coupon:'呦~'}[type];
+                var dataWrap = document.querySelector('#dataWrap');
+                var errorWrap = document.querySelector('#errorWrap');
+                var errorText = document.querySelector('#errorText');
+
+                dataWrap && (dataWrap.style.display = 'none');
+                errorText.innerHTML = msg;
+                errorWrap && (errorWrap.style.display = 'flex');
+
+                window.aegis && window.aegis.report({ 
+                    msg: type + '.js load fail', 
+                    level: Aegis.LOG_TYPE.SCRIPT_ERROR
+                });
+            }
+            typeof mqq === 'undefined' && errTip('qqapi');
+            typeof config_packs === 'undefined' && errTip('packs');
+            typeof Zepto === 'undefined' && errTip('Zepto');
+            typeof redpackets === 'undefined' && errTip('coupon');
+
+        </script>
+    </body>
+</html>
