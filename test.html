@@ -1,253 +1,1879 @@
 
 <!DOCTYPE html>
-<html lang="zh-CN">
-    <head>
-        <meta charset="utf-8">
-        <meta name="format-detection" content="telephone=no" />
-        <meta http-equiv="x-dns-prefetch-control" content="on">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-        <title> </title>
-        <script type="text/javascript">
-           
-                var baseWidth = 750;
-                var html = document.documentElement;
-                var webSetFont = 1;
-                try {
-                    webSetFont = getComputedStyle(document.documentElement, false).fontSize;
-                    webSetFont = parseFloat(webSetFont) / 16;
-                } catch (e) {}
-                var grids = baseWidth / 100;
-                var recalc = function () {
-                    var clientWidth = window.screen.width || html.clientWidth || 375;
-                    // 修复安卓分屏下横竖屏切换bug
-                    if(document.body && document.body.clientWidth){
-                        clientWidth = document.body.clientWidth;
-                    }
-                    html.style.fontSize = clientWidth / grids / webSetFont + 'px';
-                    console.log('fontSize:', window.innerWidth, html.clientWidth);
-                };
-                if (document.addEventListener) {
-                    var resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
-                    window.addEventListener(resizeEvt, recalc, false);
-                    document.addEventListener('DOMContentLoaded', recalc, false);
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>MobileQQ JS API Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="format-detection" content="telephone=no">
+    <style type="text/css" media="screen">
+    	button.btn{
+    		margin: 5px;
+    	}
+         .log{
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0,0,0,.7);
+            color: #fff;
+        }
+        .log .scroll{
+            height: 60px;
+            overflow: auto;
+            padding: 5px 10px 15px;
+            line-height: 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .log .bar{
+            position: absolute;
+            margin: 0;
+            height: 10px;
+            width: 40px;
+            background-color: rgba(255,255,255,.4);
+            border-radius: 2px 2px 0 0;
+            right: 10px;
+            bottom: 0;
+        }
+        .log .clear,
+        .log .filter{
+            font-size: 9px;
+            text-align: center;
+            background-color: #eee;
+            color: #333;
+            margin: 0;
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            height: 15px;
+            width: 40px;
+            line-height: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 3px rgba(0,0,0,.5)
+        }
+        .log .filter{
+            left: 50px;
+        }
+        #filter{
+            background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAwUExURQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFo/HAsAAAAPdFJOUwBr+TFcBcax7xXnoICQD8JuvSsAAABRSURBVAjXY2DABKxuHYkBIEb4f6X/pSDG/SUzvX4DaWZ9AzBm4PkO5O0XYGDg/gtknD+AJAJXA9b1DWbOfwGIySnyH8GWvGNgBAuBgJAA3G4AX3Aa3sQ6lwMAAAAASUVORK5CYII=) no-repeat;
+            padding-left: 16px;
+            width: 100%;
+            height: 22px;
+            margin-bottom: 10px;
+        }
+        .eval-box textarea{
+            height: 150px;
+            width: 100%;
+        }
+        .eval-box button{
+            height: 50px;
+            width: 150px;
+            background-color: #00ACC1;
+            border: none;
+            color: #fff;
+        }
+    </style>
+</head>
+<body style="background: #fff">
+	<h1 class="text-center" >MobileQQ JS API Demo</h1>
+    <input id="filter" type="search" />
+	<div id="container" class="container">
+        <textarea id="textarea" class="span12" style="height: 160px;width: 100%;font-size: 10px;"></textarea>
+        <hr/>
+        <img id="img" class="img img-polaroid">
+        <hr/>
+        <!-- <div class="eval-box">
+            <label>执行脚本：<textarea id="evalCode"></textarea></label>
+            <button id="runCode">执行</button>
+        </div>
+        <hr/> -->
+    </div>
+<script>
+    window.onerror = function () {
+        alert(JSON.stringify(arguments))
+    }
+</script>
+<script src="./qqapi.debug.js"></script>
+<script src="./qqapi.uncompressed.js"></script>
+
+<script >
+!function() {
+
+    // var $log = document.querySelector(".log");
+
+    // mqq.debuging = true;
+    // mqq.QQVersion = 1.0;
+    function formatDate(date, formatString) {
+        /*
+         * eg:formatString="YYYY-MM-DD hh:mm:ss";
+         */
+        var o = {
+            "M+": date.getMonth() + 1, //month
+            "D+": date.getDate(), //day
+            "h+": date.getHours(), //hour
+            "m+": date.getMinutes(), //minute
+            "s+": date.getSeconds(), //second
+            "q+": Math.floor((date.getMonth() + 3) / 3), //quarter
+            "S": date.getMilliseconds() //millisecond
+        };
+
+        if (/(Y+)/.test(formatString)) {
+            formatString = formatString.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+        }
+
+        for (var k in o) {
+            if (new RegExp("(" + k + ")").test(formatString)) {
+                formatString = formatString.replace(RegExp.$1, RegExp.$1.length === 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+            }
+        }
+        return formatString;
+    }
+    var container = document.getElementById('container');
+    var textarea = document.getElementById('textarea');
+    var img = document.getElementById('img');
+    function log(msg){
+        var args = Array.prototype.slice.call(arguments);
+        textarea.value += formatDate(new Date(), 'YYYY-MM-DD hh:mm:ss') + '\n' + args.join(' ,') + '\n==========\n';
+        textarea.scrollTop = textarea.scrollHeight;
+    }
+    var checkAPICache = {};
+
+    textarea.onclick = function(){
+
+        setTimeout(function(){ mqq.data.pbReport(103, 'sadlkdsf');}, 0);
+    }
+    // setInterval(function(){
+    //     mqq.device.getNetworkType(function(data){
+    //     });
+    // }, 200);
+
+    function addButton(cmdName, func) {
+
+        if(cmdName.indexOf('.') > -1){
+            var str = func.toString();
+            var match = str.match(/\b(mqq\.[\w\.]+)/g);
+            match.forEach(function(name){
+                if(checkAPICache[name]){
+                    return;
                 }
-                recalc();
-        </script>
-        <link rel="stylesheet" type="text/css" href="//i.qianbao.qq.com/redpackets2023/dist/css/coupon.css?_bid=5359&v=6&max_age=2592000&_discheck=1">
-    </head>
-    <!--过期页，已使用页body加unable属性-->
-    <body ontouchstart="" class="">
-        <script>
-            var ua = navigator.userAgent;
-            var isTablet = /(?:iPad|PlayBook)/.test(ua) || (/(?:Android)/.test(ua) && !/(?:Mobile)/.test(ua))
-            document.body.classList.add(ua.indexOf('Android') > -1 ? 'Android' : 'iOS');
-            isTablet && document.body.classList.add('Tablet');
-        </script>
-        <div class="errorWrap" style="display: none;" id="errorWrap" >
-            <div class="errorIcon"></div>
-            <p class="errorText" id="errorText">卡券不存在</p>
-        </div>
-        <div class="dataWrap"  id="dataWrap">
-            <div class="overlay"></div>
-            <div class="bg">
-                <div id="bg" class="bgc"></div>
-            </div>
-            <div class="detailBox" id="detailBox">
-                <div class="advTag"></div>
-                <div class="logoOuterBox">
-                    <div class="logoInnerBox" id="logoInnerBox">
-                        <div class="logo" id="logo" >
-                            <div class="logoCover" ></div>
-                        </div>
-                    </div>
-                    <div class="brandNameBox" id="brandNameBox">
-                        <p class="brandName" id="biz"></p>
-                    </div>
-                </div>
-                <div class="couponsMessageBox">
-                    <div class="textureBox">
-                        <p class="couponsName oneLine" id="name"></p>
-                        <p class="subTip oneLine" id="extTxt"></p>
-                        <div class="buttonBox" id="buttonBox">
-                            <p class="button" id="button"></p>
-                        </div>
-                        <p class="goodFortune" id="goodFortune"></p>
-                        <div class="bottomBox">
-                            <p class="expiredText" id="expiredText"></p>
-                            <div class="ruleButtonBox" id="ruleButton">
-                                <p class="ruleButton" >使用规则<div id="arrow" class="arrow rotateArrow"></div></p>
-                            </div>
-                        </div>
-                        <div class="ruleBox" id="ruleBox">
+                checkAPICache[name] = 1;
+                log('Support ' + name + ' ? ' + mqq.support(name));
+            });
+        }
 
-                        </div>
+        var btn = document.createElement('button');
+        btn.setAttribute('class', 'btn btn-primary');
+        btn.innerHTML = cmdName;
+        btn.onclick = function(){
+            try{
+                func();
+            }catch(e){
+                throw e;
+            }
+        };
+        container.appendChild(btn);
+    }
 
-                    </div>
-                    
-                </div>
-            </div>
-        </div>
-        <script src="//pub.idqqimg.com/qqmobile/qqapi.wk.js?_bid=152&max_age=2592000&_discheck=1"></script>
-        <script src="//i.qianbao.qq.com/redpackets2023/upSource/dist/js/common.js?_bid=5319&v=6&max_age=2592000&_discheck=1"></script>
-        
-        <script>
-             mqq.ui.setWebViewBehavior({
+    function addText(text) {
+        var p = document.createElement('p');
+        p.setAttribute('class', '');
+        p.innerHTML = text;
+        container.appendChild(p);
+    }
+
+    // document.getElementById('runCode').onclick = function () {
+    //     var code = document.getElementById('evalCode').value;
+    //     if ( code ) {
+    //         eval(code);
+    //     }
+    // }
+
+
+    addButton('mqq env', function() {
+        alert(JSON.stringify(mqq));
+    });
+
+    function addSeparator() {
+        var dom = document.createElement('hr');
+        container.appendChild(dom);
+    }
+
+    window.onerror = function(msg, url, lineNumber){
+        setTimeout(function(){
+            alert('出错啦!\n' + msg + '\nline: ' + lineNumber + '\nurl: ' + url);
+            }, 0);
+    };
+
+    document.getElementById('filter').addEventListener('input', function(e){
+        var value = (e.currentTarget.value || '').toLowerCase();
+        var els = document.getElementsByTagName('button');
+        [].forEach.call(els, function(el){
+            el.style.display = el.innerText.toLowerCase().indexOf(value) == -1 ? 'none' : ''
+        });
+    }, false);
+
+    log(navigator.userAgent);
+
+    addButton('clear', function(){
+        textarea.value = '';
+        log(location.href);
+    });
+
+    addSeparator();
+
+    mqq.addEventListener('qbrowserOptionsButtonClick', function(data, source){
+        log('Receive event: qbrowserOptionsButtonClick, data: ' + JSON.stringify(data) + ', source: ' + JSON.stringify(source));
+
+    });
+
+    mqq.addEventListener('qbrowserTitleBarClick', function(data, source){
+        log('Receive event: qbrowserTitleBarClick, data: ' + JSON.stringify(data) + ', source: ' + JSON.stringify(source));
+
+    });
+
+    var evtHandler = function(data, source){
+        log('Event(hello) fire: ' + JSON.stringify(data) + ', source: ' + JSON.stringify(source));
+    };
+
+    addButton('addEventListener(hello),see upon log', function(){
+        mqq.addEventListener('hello', evtHandler);
+    });
+
+    addButton('addEventListener(hello)2,see upon log', function(){
+        mqq.addEventListener('hello', function(data, source){
+            log('Event(hello) fire 2: ' + JSON.stringify(data) + ', source: ' + JSON.stringify(source));
+        });
+    });
+
+    addButton('removeEventListener(hello),see upon log', function(){
+        mqq.removeEventListener('hello', evtHandler);
+    });
+
+    addButton('removeEventListener(hello) all,see upon log', function(){
+        mqq.removeEventListener('hello');
+    });
+
+    addText('打开新的不同域名的webview用于调试');
+    addButton('新webview打开相同的域名', function() {
+        mqq.ui.openUrl({
+            target: 1,
+            url: location.href
+        });
+    });
+    addButton('新webview打开www.qq.com的域名, 注意替换页面', function() {
+        mqq.ui.openUrl({
+            target: 1,
+            url: location.href.replace(location.host, 'www.qq.com')
+        });
+    });
+    addButton('新webview打开www.tencent.com的域名, 注意替换页面', function() {
+        mqq.ui.openUrl({
+            target: 1,
+            url: location.href.replace(location.host, 'www.tencent.com')
+        });
+    });
+    addButton('打开不带协义的地址,自动适配当前页面协义,如 //www.tencent.com, 能在新页面打开当前页面即可', function() {
+        mqq.ui.openUrl({
+            target: 1,
+            url: location.href.replace(location.protocol, '')
+        });
+    });
+
+    addText('不传配置参数，默认派发给自己和所有同域webview页面');
+    addButton('dispatchEvent("hello", {name:"alloy", gender:1}),see upon log', function(){
+        mqq.dispatchEvent("hello", {name:"alloy", gender:1});
+    });
+
+    addButton('dispatchEvent("hello", {name:"alloy2", gender:2}, {echo: true, broadcast: true, domains: ["*.qq.com", "pub.idqqimg.com"]}),see upon log', function(){
+        mqq.dispatchEvent("hello", {name:"alloy2", gender:2}, {echo: true, broadcast: true, domains: ["*.qq.com", "pub.idqqimg.com"]});
+    });
+
+    addButton('dispatchEvent("hello", {name:"alloy2", gender:2}, {echo: true, broadcast: true, domains: ["*.qq.com"]}),see upon log', function(){
+        mqq.dispatchEvent("hello", {name:"alloy2", gender:2}, {echo: true, broadcast: true, domains: ["*.qq.com"]});
+    });
+
+    addButton('dispatchEvent("hello", {name:"alloy3", gender:3}, {echo: false, broadcast: true, domains: ["*.qq.com", "*.tencent.com"]}),see upon log', function(){
+        mqq.dispatchEvent("hello", {name:"alloy3", gender:3}, {echo: false, broadcast: true, domains: ["*.qq.com", "*.tencent.com"]});
+    });
+
+    addButton('dispatchEvent("hello", {name:"alloy4", gender:4}, {echo: false, broadcast: false, domains: ["*.qq.com", "*.tencent.com"]}),see upon log', function(){
+        mqq.dispatchEvent("hello", {name:"alloy4", gender:4}, {echo: false, broadcast: false, domains: ["*.qq.com", "*.tencent.com"]});
+    });
+    addSeparator();
+
+    addButton('mqq.device.isMobileQQ', function() {
+        mqq.device.isMobileQQ(function(result){
+            alert(result);
+        });
+    });
+
+    addButton('mqq.device.getNetworkType', function() {
+        mqq.device.getNetworkType(function(data){
+            alert(data);
+        });
+    });
+    /*mqq.device.getNetworkType(function(data){
+        alert(data);
+    });*/
+
+    addButton('mqq.device.getDeviceInfo', function() {
+        mqq.device.getDeviceInfo(function(data){
+            alert(JSON.stringify(data));
+        });
+    });
+    /*mqq.device.getDeviceInfo(function(data){
+        alert(JSON.stringify(data));
+    });*/
+    addButton('mqq.device.getNetworkInfo', function() {
+        mqq.device.getNetworkInfo(function(data){
+            alert(JSON.stringify(data));
+        });
+    });
+
+    addButton('mqq.device.getClientInfo', function() {
+
+        mqq.device.getClientInfo(function(data){
+            alert(JSON.stringify(data));
+        });
+
+    });
+    /*mqq.device.getClientInfo(function(data){
+        alert(JSON.stringify(data));
+    });*/
+
+    addButton('mqq.device.getWebViewType', function() {
+        mqq.device.getWebViewType(function(data){
+            alert(data);
+        });
+    });
+    /*mqq.device.getWebViewType(function(data){
+        alert(data);
+    });*/
+
+    addButton('mqq.device.setScreenStatus', function() {
+        mqq.device.setScreenStatus({ status: prompt("status: ") || 0}, function(data){
+            alert(typeof data + ': ' + JSON.stringify(data));
+        });
+    });
+
+
+    addSeparator();
+
+    addButton('mqq.app.isAppInstalled("mobileqq")', function() {
+
+        mqq.app.isAppInstalled(mqq.android ? 'com.tencent.mobileqq' : 'mqq', function(data){
+            log(data);
+        });
+
+
+    });
+
+    addButton('mqq.app.isAppInstalledBatch', function() {
+        mqq.app.isAppInstalledBatch(mqq.android ? ['com.tencent.mobileqq','com.tencent.qzone'] : ['mqq','qzone'], function(data){
+            log('mobileqq,qzone is install: ' + JSON.stringify(data));
+        });
+    });
+
+    addButton('mqq.app.launchAppWithTokens', function() {
+        mqq.app.launchAppWithTokens({
+            appID: 100363349,
+            paramsStr: "openid=$OPID$"
+        }, function(data){
+            alert(JSON.stringify(data));
+        });
+    });
+
+    addButton('mqq.app.downloadApp', function() {
+        mqq.app.downloadApp({
+            "appid": "100686922", // 开平appid
+            "url": "http://view.inews.qq.com/appDownLoad/322?refer=biznew&src=mQQ&ostype=android&uin=", // 下载地址，走手Q下载SDK时使用
+            "packageName": "com.tencent.news", // 包名
+            "actionCode": "2", // 动作类型
+            "via": "ANDROIDQQ.TXNEWS", // via 用于上报罗盘
+            "appName": "TencentNews", // 应用名称，用于标题展示
+        }, function(data){
+            alert(JSON.stringify(data))
+            // $log.innerText = data.pro + " | " + Math.random();
+        });
+    });
+
+    addSeparator();
+
+    addButton('mqq.ui.setWebViewBehavior(关闭右滑)', function() {
+        mqq.ui.setWebViewBehavior({
             swipeBack:0,
             actionButton: 0
         });
-            var getCookie = function(name) {
-                var re = new RegExp(`(?:^|;+|\\s+)${name}=([^;]*)`);
-                var result = document.cookie.match(re);
-                return (!result ? '' : result[1]);
-            };
-            var uin = getCookie('uin').replace(/o0*/,'');
+    }); 
+    addButton('mqq.ui.setWebViewBehavior(开启右滑, 显示actionbutton)', function() {
+        mqq.ui.setWebViewBehavior({
+            swipeBack:1,
+            actionButton: 1
+        });
+    });
+    addButton('mqq.ui.setWebViewBehavior(bottomBar:false, historyBack: true)', function() {
+        mqq.ui.setWebViewBehavior({
+            bottomBar: false,
+            historyBack: true
+        });
+    });
+    addButton('mqq.ui.setWebViewBehavior(bottomBar:true, historyBack: false)', function() {
+        mqq.ui.setWebViewBehavior({
+            bottomBar: true,
+            historyBack: false
+        });
+    });
+    addButton('mqq.ui.setWebViewBehavior(webPageBackgroundColor:0xffff00, webPageBackgroundColorOpen:YES})', function() {
+        mqq.ui.setWebViewBehavior({
+            webPageBackgroundColor: 0xffff00,
+            webPageBackgroundColorOpen: 'YES'
+        });
+    });
+    addButton('mqq.ui.setWebViewBehavior(webPageBackgroundColor:, webPageBackgroundColorOpen:NO})', function() {
+        mqq.ui.setWebViewBehavior({
+            webPageBackgroundColor: '',
+            webPageBackgroundColorOpen: 'NO'
+        });
+    });
 
-            window.aegis = new Aegis({
-                id: 'nGKJaHKO20GxbgE3n7',
-                hostUrl: 'https://rumt-zh.com',
-                uin: uin,
-                reportApiSpeed: false,
-                reportAssetSpeed: true,
-                spa: true,
-            })
-        </script>
-        <script src="//i.qianbao.qq.com/redpackets2023/js/coupon-packs-1.0.js?_bid=5320&v=7&max_age=2592000&_discheck=1"></script>
-        <script>
-            function addCard(){
-                config_packs["11399"] = {
-                    "name": "鹅毛专属福利等你领",
-                    "valid": "有效期至2023-03-01 23:59:59",
-                    "biz": "王者荣耀",
-                    "extTxt": "抢先预约，福利不错过！",
-                    "rule": "<li>1、卡券领取后存入QQ钱包的卡券中；</li><li>2、使用方法：用户可通过卡券参与预约活动，成功订阅后将在1月21日0点-22日23点期间通过私人助手/QQ提醒/系统日历向你推送提醒。若已开启了日历提醒，后续可以从【游戏中心】-【头像】-【设置】-【日历通知设置】关闭授权；</li><li>3、到期说明：请在2023年3月1日前领取卡券并完成兑换；</li><li>4、其他说明：游戏礼包禁止出售，无法转让、赠送他人；如因非腾讯原因导致您在本规则约定时间内未参与活动、兑换奖品或领取奖品，或由于您提供的信息不真实不完整等导致奖品无法发放或发放错误的，由您自行承担全部损失；</li><li>5、联系方式：如有疑问，请关注手机QQ公众号“腾讯客服”获取服务。</li>",
-                    "btnText": "前往查看",
-                    "lockButtonText": "我要预约",
-                    "url": {
-                        "get": "https://youxi.gamecenter.qq.com/gcact/dist/2023-spring-sale/sgame/index.html?_wv=2303971&_wwv=196996&_fv=0&_autosub_=1"
-                    },
-                    "logoName": "5f6761db30b681139d80b8cdac222607.png",
-                    "bgName": "6faef76325c291204f468ec91d1a22ad.jpg?_bid=0"
-                };
+    addButton('mqq.ui.setWebViewBehavior(navTextColor: navBgColor: })', function() {
+        mqq.ui.setWebViewBehavior({
+            navTextColor: 0xff0000,
+            navBgColor: 0x00ff00
+        });
+    });
+/*mqq.addEventListener("qbrowserTitleBarClick", function(data, source){
+ console.log("Receive event: qbrowserTitleBarClick, data: " + JSON.stringify(data) + ", source: " + JSON.stringify(source));
+});*/
+/*setTimeout(function () {
+    MQQfirebug.log({s:'dododo'})
+}, 1000)*/
+    /*mqq.addEventListener("qbrowserPullDownCancel", function () {
+        $log.innerText = 'qbrowserPullDownCancel' + Math.random()
+        mqq.ui.setPullDown({ success: false , text: '取消刷新' })
+    });*/
 
-                config_packs["11400"] = {
-                    "name": "鹅毛市集88点券优惠卡",
-                    "valid": "有效期至2023-02-21 23:59:59",
-                    "biz": "鹅毛市集",
-                    "extTxt": "购指定皮肤享88点券优惠",
-                    "rule": "<li>1、卡券领取后存入QQ钱包的卡券中；</li><li>2、礼包内容：鹅毛市集X王者荣耀88点券优惠卡；</li><li>3、使用方法：在鹅毛市集购买（不包含赠送）王者荣耀指定皮肤时，可抵扣88点券（8.8元）；皮肤包含：鲁班大师-归虚梦演、蒙犽-归虚梦演、上官婉儿-修竹墨客、明世隐-占星师、蔡文姬-蔷薇王座、王昭君-精灵公主、弈星-踏雪寻梅、嫦娥-露花倒影、小乔-万圣前夜、公孙离-花间舞；</li><li>4、到期说明：请在2023年2月21日前领取卡券并完成兑换；</li><li>5、其他说明：游戏礼包禁止出售，无法转让、赠送他人；如因非腾讯原因导致您在本规则约定时间内未参与活动、兑换奖品或领取奖品，或由于您提供的信息不真实不完整等导致奖品无法发放或发放错误的，由您自行承担全部损失；</li><li>6、联系方式：如有疑问，请关注手机QQ公众号“腾讯客服”获取服务。</li>",
-                    "btnText": "前往查看",
-                    "url": {
-                        "get": "https://year.gamecenter.qq.com/xgame/spring-festival/dist/2023-game-coupon/index.html?_wv=18950115&_wwv=260"
-                    },
-                    "logoName": "094323dfcbb5eb6f711e8f261db06812.png",
-                    "bgName": "a0f061367304fc017269b99d6030501e.jpg?_bid=5371"
-                };
+    addButton('mqq.ui.setPullDown(开启下拉刷新)', function() {
 
-                config_packs["11401"] = {
-                    "name": "鹅毛市集178点券优惠卡",
-                    "valid": "有效期至2023-02-21 23:59:59",
-                    "biz": "鹅毛市集",
-                    "extTxt": "购指定皮肤享178点券优惠",
-                    "rule": "<li>1、卡券领取后存入QQ钱包的卡券中；</li><li>2、礼包内容：鹅毛市集X王者荣耀178点券优惠卡；</li><li>3、使用方法：在鹅毛市集购买（不包含赠送）王者荣耀指定皮肤时，可抵扣178点券（17.8元）；皮肤包含：宫本武藏-未来纪元、孙膑-天使之翼、典韦-黄金武士、刘备-汉昭烈帝、花木兰-兔女郎；</li><li>4、到期说明：请在2023年2月21日前领取卡券并完成兑换；</li><li>5、其他说明：游戏礼包禁止出售，无法转让、赠送他人；如因非腾讯原因导致您在本规则约定时间内未参与活动、兑换奖品或领取奖品，或由于您提供的信息不真实不完整等导致奖品无法发放或发放错误的，由您自行承担全部损失；</li><li>6、联系方式：如有疑问，请关注手机QQ公众号“腾讯客服”获取服务。</li>",
-                    "btnText": "前往查看",
-                    "url": {
-                        "get": "https://year.gamecenter.qq.com/xgame/spring-festival/dist/2023-game-coupon/index.html?_wv=18950115&_wwv=260"
-                    },
-                    "logoName": "094323dfcbb5eb6f711e8f261db06812.png",
-                    "bgName": "2bf44a3202dc3eb56240e93bcce4ead7.jpg?_bid=5371"
-                };
+        // mqq.addEventListener("qbrowserPullDown", function () {
+        //     // $log.innerText = 'qbrowserPullDown' + Math.random()
+        //     // alert('ddididid')
+        //     mqq.ui.setPullDown({ success: true , text: '刷新成功' })
+        // });
+        mqq.ui.setPullDown({
+            enable:true
+        });
+    });
 
-                config_packs["11402"] = {
-                    "name": "鹅毛市集68点券优惠卡",
-                    "valid": "有效期至2023-02-21 23:59:59",
-                    "biz": "鹅毛市集",
-                    "extTxt": "购指定皮肤享68点券优惠",
-                    "rule": "<li>1、卡券领取后存入QQ钱包的卡券中；</li><li>2、礼包内容：鹅毛市集X王者荣耀68点券优惠卡；</li><li>3、使用方法：在鹅毛市集购买（不包含赠送）王者荣耀指定皮肤时，可抵扣68点券（6.8元）；皮肤包含：戈娅-危途狂花、瑶-森、李信-灼热之刃、澜-孤猎、曜-归虚梦演、西施-归虚梦演、百里守约-绝影神枪、貂蝉-异域舞娘、暃-碧珀绯影；</li><li>4、到期说明：请在2023年2月21日前领取卡券并完成兑换；</li><li>5、其他说明：游戏礼包禁止出售，无法转让、赠送他人；如因非腾讯原因导致您在本规则约定时间内未参与活动、兑换奖品或领取奖品，或由于您提供的信息不真实不完整等导致奖品无法发放或发放错误的，由您自行承担全部损失；</li><li>6、联系方式：如有疑问，请关注手机QQ公众号“腾讯客服”获取服务。</li>",
-                    "btnText": "前往查看",
-                    "url": {
-                        "get": "https://year.gamecenter.qq.com/xgame/spring-festival/dist/2023-game-coupon/index.html?_wv=18950115&_wwv=260"
-                    },
-                    "logoName": "094323dfcbb5eb6f711e8f261db06812.png",
-                    "bgName": "6bf288e9126bc74ada8d8e9598735e38.jpg?_bid=5371"
-                };
+    /*document.addEventListener('scroll', function () {
+        alert('dodo')
+    })*/
 
-                config_packs["11403"] = {
-                    "name": "鹅毛市集218点券优惠卡",
-                    "valid": "有效期至2023-02-21 23:59:59",
-                    "biz": "鹅毛市集",
-                    "extTxt": "购指定皮肤享218点券优惠",
-                    "rule": "<li>1、卡券领取后存入QQ钱包的卡券中；</li><li>2、礼包内容：鹅毛市集X王者荣耀218点券优惠卡；</li><li>3、使用方法：在鹅毛市集购买（不包含赠送）王者荣耀指定皮肤时，可抵扣218点券（21.8元）；皮肤包含：吕布-末日机甲、妲己-女仆咖啡、花木兰-水晶猎龙者、安琪拉-心灵骇客、阿轲-节奏热浪；</li><li>4、到期说明：请在2023年2月21日前领取卡券并完成兑换；</li><li>5、其他说明：游戏礼包禁止出售，无法转让、赠送他人；如因非腾讯原因导致您在本规则约定时间内未参与活动、兑换奖品或领取奖品，或由于您提供的信息不真实不完整等导致奖品无法发放或发放错误的，由您自行承担全部损失；</li><li>6、联系方式：如有疑问，请关注手机QQ公众号“腾讯客服”获取服务。</li>",
-                    "btnText": "前往查看",
-                    "url": {
-                        "get": "https://year.gamecenter.qq.com/xgame/spring-festival/dist/2023-game-coupon/index.html?_wv=18950115&_wwv=260"
-                    },
-                    "logoName": "094323dfcbb5eb6f711e8f261db06812.png",
-                    "bgName": "1772d2c8ac2b88fe371578614958848e.jpg?_bid=5371"
-                };
 
-                config_packs["11404"] = {
-                    "name": "鹅毛市集688点券优惠卡",
-                    "valid": "有效期至2023-02-21 23:59:59",
-                    "biz": "鹅毛市集",
-                    "extTxt": "购指定皮肤享688点券优惠",
-                    "rule": "<li>1、卡券领取后存入QQ钱包的卡券中；</li><li>2、礼包内容：鹅毛市集X王者荣耀688点券优惠卡；</li><li>3、使用方法：在鹅毛市集购买（不包含赠送）鲁班七号-电玩小子时，可抵扣688点券（68.8元）；</li><li>4、到期说明：请在2023年2月21日前领取卡券并完成兑换；</li><li>5、其他说明：游戏礼包禁止出售，无法转让、赠送他人；如因非腾讯原因导致您在本规则约定时间内未参与活动、兑换奖品或领取奖品，或由于您提供的信息不真实不完整等导致奖品无法发放或发放错误的，由您自行承担全部损失；</li><li>6、联系方式：如有疑问，请关注手机QQ公众号“腾讯客服”获取服务。</li>",
-                    "btnText": "前往查看",
-                    "url": {
-                        "get": "https://year.gamecenter.qq.com/xgame/spring-festival/dist/2023-game-coupon/index.html?_wv=18950115&_wwv=260"
-                    },
-                    "logoName": "094323dfcbb5eb6f711e8f261db06812.png",
-                    "bgName": "5f5c15b2d0a4ad6eb27959ecd36e4d36.jpg?_bid=5371"
-                };
-            }
+    addButton('mqq.ui.setTitleButtons(设置bar栏的左右按钮)', function() {
 
-            function addCard11405(){
-                config_packs["11405"] = {
-                    "name": "享多款新皮肤优惠购",
-                    "valid": "有效期至2023-01-20 23:59:59",
-                    "biz": "王者荣耀",
-                    "extTxt": "买多省多，快来预约",
-                    "lockButtonText": "我要预约",
-                    "rule": "<li>1、卡券领取后存入QQ钱包的卡券中；</li><li>2、用户可通过卡券参与预约活动，成功订阅后将在1月21日0点-22日23点期间通过私人助手/QQ提醒/系统日历向你推送提醒，若已开启了日历提醒，后续可以从【游戏中心】-【头像】-【设置】-【日历通知设置】关闭授权；</li><li>3、联系方式：如有疑问，请关注手机QQ公众号“腾讯客服”获取服务。</li>",
-                    "btnText": "前往查看",
-                    "url": {
-                        "get": "https://youxi.gamecenter.qq.com/gcact/dist/2023-spring-sale/sgame/index.html?_wv=2303971&_wwv=229764&_fv=0&_autosub_=1"
-                    },
-                    "logoName": "5f6761db30b681139d80b8cdac222607.png",
-                    "bgName": "8ca08e08bae104cb0c86ccfd895b59a7.jpg?_bid=0"
+        mqq.ui.setTitleButtons({
+            left : {
+                title : "我的礼包",
+                callback : function () {
+                    alert("do")
+                }
+            },
+            right : {
+                title : "我的...",
+                callback : function () {
+                    alert('right');
                 }
             }
+        })
+    });
+    /*addButton('mqq.ui.setPullDown(开启下拉刷新1)', function() {
+        mqq.addEventListener("qbrowserPullDownCancel", function () {
+            // alert('qbrowserPullDown')
+            mqq.ui.setPullDown({ success: false , text: '取消刷新' })
+        });
+        mqq.ui.setPullDown({
+            enable:true
+        });
+    });*/
 
-            if (config_packs) {
-                addCard();
-                addCard11405();
-            }
-        </script>
-        <script src="//i.qianbao.qq.com/redpackets2023/dist/coupon.js?_bid=5319&v=14&max_age=2592000&_discheck=1"></script>
-        <script>
-
-            // 对文件未加载的情况做提示
-            function errTip(type){
-                var msg = '当前网络繁忙<br>稍后请在QQ钱包的卡券中查看' + {qqapi:'!',packs:'~',Zepto:'。', coupon:'呦~'}[type];
-                var dataWrap = document.querySelector('#dataWrap');
-                var errorWrap = document.querySelector('#errorWrap');
-                var errorText = document.querySelector('#errorText');
-
-                dataWrap && (dataWrap.style.display = 'none');
-                errorText.innerHTML = msg;
-                errorWrap && (errorWrap.style.display = 'flex');
-
-                window.aegis && window.aegis.report({ 
-                    msg: type + '.js load fail', 
-                    level: Aegis.LOG_TYPE.SCRIPT_ERROR
+    addButton('mqq.ui.setOnShareHandler', function() {
+        mqq.ui.setOnShareHandler(function(data){
+            alert('share: ' + JSON.stringify(data));
+        });
+    });
+    addButton('mqq.ui.setOnShareHandler:share2QQ', function() {
+        mqq.ui.setOnShareHandler(function(data){
+            
+            if ( data === '0' ) {
+                mqq.ui.shareMessage({
+                    title: '5.3马上要来了，你知道吗',
+                    desc: '这里是分享的内容，支持定向分享哦，快来体验海量Q粉吧！',
+                    share_url: 'http://open.mobile.qq.com/sdk/qqapi.test.html',
+                    share_type:0,
+                    back: true,
+                    sourceName: '个人定制',
+                    uinType: 0,
+                    // back: true,
+                    image_url: 'http://dcloud.oa.com/Public/waltz/ck_img/1393900982.png'
+                }, function(result){
+                    alert(JSON.stringify(result));
+                    alert(result.retCode === 0 ? '分享成功' : ('分享失败, ret=' + result.retCode));
                 });
             }
-            typeof mqq === 'undefined' && errTip('qqapi');
-            typeof config_packs === 'undefined' && errTip('packs');
-            typeof Zepto === 'undefined' && errTip('Zepto');
-            typeof redpackets === 'undefined' && errTip('coupon');
+        });
+    });
+    addButton('mqq.ui.setOnCloseHandler', function() {
+        mqq.ui.setOnCloseHandler(function(data){
+            alert('ahhh 关不掉: ' + JSON.stringify(data));
+            mqq.ui.popBack();
+        });
+    });
 
-        </script>
-    </body>
-</html>
+    addButton('mqq.ui.openAIO', function() {
+        mqq.ui.openAIO({
+            uin:  prompt('QQ: ') ||  '1417709848',
+            chat_type: 'c2c'
+        });
+    });
+    addButton('mqq.ui.showOfficalAccountDetail', function() {
+        mqq.ui.showOfficalAccountDetail({
+            uin: '2909288299'
+        });
+    });
+    addButton('mqq.ui.showOfficialAccountProfile', function() {
+        mqq.ui.showOfficialAccountProfile({
+            uin: '2909288299'
+        });
+    });
+    addButton('mqq.ui.showBarAccountDetail', function() {
+        mqq.ui.showBarAccountDetail({
+            uin: '3198696308'
+        });
+    });
+
+    addButton('mqq.ui.showProfile', function() {
+        mqq.ui.showProfile({
+            uin: '10000'
+        });
+    });
+    addButton('mqq.ui.showProfile{uin: \'27057851\', uinType: 0}', function() {
+        mqq.ui.showProfile({
+            uin: 27057851,
+            uinType: 0
+        });
+    });
+    addButton('mqq.ui.openUrl(外部浏览器打开)', function() {
+        mqq.ui.openUrl({
+            target: 2,
+            url: 'http://s.p.qq.com/pub/msg'
+        });
+    });
+    addButton('mqq.ui.openUrl(新WebView打开), style: 0', function() {
+        mqq.ui.openUrl({
+            target: 1,
+            style: 0,
+            url: location.href
+        });
+    });
+    addButton('mqq.ui.openUrl(新WebView打开)android动画效果, animation: 0', function() {
+        mqq.ui.openUrl({
+            target: 1,
+            style: 0,
+            animation: 0,
+            url: location.href
+        });
+    });
+    addButton('mqq.ui.openUrl(新WebView打开)android动画效果, animation: 1', function() {
+        mqq.ui.openUrl({
+            target: 1,
+            style: 0,
+            animation: 1,
+            url: location.href
+        });
+    });
+    addButton('mqq.ui.openUrl(新WebView打开)android动画效果, animation: 2', function() {
+        mqq.ui.openUrl({
+            target: 1,
+            style: 0,
+            animation: 2,
+            url: location.href
+        });
+    });
+    addButton('mqq.ui.openUrl(新WebView打开), style: 1', function() {
+        mqq.ui.openUrl({
+            target: 1,
+            style: 1,
+            url: 'http://s.p.qq.com/pub/msg'
+        });
+    });
+    addButton('mqq.ui.openUrl(新WebView打开), style: 2', function() {
+        mqq.ui.openUrl({
+            target: 1,
+            style: 2,
+            url: 'http://s.p.qq.com/pub/msg'
+        });
+    });
+    addButton('mqq.ui.openUrl(新WebView打开), style: 3', function() {
+        mqq.ui.openUrl({
+            target: 1,
+            style: 3,
+            url: 'http://s.p.qq.com/pub/msg'
+        });
+    });
+
+    addButton('mqq.ui.openGroupPhotoView(群相册首页)', function() {
+        mqq.ui.openGroupPhotoView({
+            groupUin: '32016703'
+        });
+    });
+    addButton('mqq.ui.openGroupFileView(唤起群文件)', function() {
+        mqq.ui.openGroupFileView({
+            groupUin: '32016703'
+        });
+    });
+
+    addButton('mqq.ui.openGroupCard(唤起群名片)', function() {
+        mqq.ui.openGroupCard({
+            groupUin: '32016703',
+            memberUin: '289623053'
+        });
+    });
+
+    addButton('mqq.ui.popBack', function() {
+        mqq.ui.popBack();
+    });
+    addButton('mqq.ui.returnToAIO', function() {
+        mqq.ui.returnToAIO();
+    });
+    addButton('mqq.ui.refreshTitle', function() {
+        mqq.ui.refreshTitle();
+    });
+    addButton('mqq.ui.openView: About or MarketFace', function() {
+        mqq.ui.openView({
+            name: mqq.android ? 'com.tencent.mobileqq.activity.AboutActivity' : 'MarketFace'
+
+        });
+    });
+    addButton('mqq.ui.openView: CommonComment', function() {
+        mqq.ui.openView({
+            name: mqq.android ? 'com.tencent.mobileqq.troop.activity.TroopBarReplyActivity' : 'CommonComment',
+            animation: 1001,
+            options: {
+                sendToWeb: true,
+                contentPlaceholder : "请输入你的内容",
+                maxContentLength : 700,
+                minContentLength : 2
+            },
+            onclose: mqq.callback(function(data) {
+                // 发送
+                alert(JSON.stringify(data));
+            })
+        });
+    });
+    addButton('mqq.ui.setLoading({visible: true})', function() {
+        mqq.ui.setLoading({
+            visible: true
+        });
+    });
+    addButton('mqq.ui.setLoading({visible: false})', function() {
+        mqq.ui.setLoading({
+            visible: false
+        });
+    });
+
+    addButton('mqq.ui.setActionButton', function() {
+        mqq.ui.setActionButton({title: '测试'}, function(){
+            alert('你点击了测试按钮');
+        });
+    });
+
+    addButton('mqq.ui.setActionButton(no cb)', function() {
+        mqq.ui.setActionButton({title: '测试'});
+    });
+
+    addButton('mqq.ui.setActionButton(hidden)', function() {
+        mqq.ui.setActionButton({hidden: true });
+    });
+
+    addButton('mqq.ui.showDialog', function() {
+        mqq.ui.showDialog({
+            title: '这是标题',
+            text: '这是内容这是内容这是内容这是内容这是内容',
+            needOkBtn: true,
+            needCancelBtn: true,
+            okBtnText: '大胆继续',
+            cancelBtnText: '忍痛离开'
+        }, function(result) {
+            if (result.button === 0) {
+                alert('你点击了ok');
+            } else {
+                alert('你点击了cancel');
+            }
+        });
+    });
+
+    addButton('mqq.ui.shareAudio', function() {
+        mqq.ui.shareAudio({
+            title: '尘埃落定',
+            desc: '张敬轩',
+            share_url: 'http://y.qq.com/i/song.html?songid=5168274&source=qq',
+            image_url: 'http://url.cn/RjaawB',
+            audio_url: 'http://url.cn/QjaN70'
+        }, function(result) {
+            alert(result);
+        });
+    });
+
+    addButton('mqq.ui.shareAudio(with uin)', function() {
+        mqq.ui.shareAudio({
+            title: '尘埃落定',
+            desc: '张敬轩',
+            share_url: 'http://y.qq.com/i/song.html?songid=5168274&source=qq',
+            image_url: 'http://url.cn/RjaawB',
+            audio_url: 'http://url.cn/QjaN70',
+            toUin: '819611479',
+            uinType: 0,
+            appid: 100497308,
+            report: 'Music_gene_aio'
+        }, function(result) {
+            alert(result);
+        });
+    });
+
+    addButton('mqq.ui.shareMessage', function() {
+        var ori = location.href;
+        var url = ori;
+
+        mqq.ui.shareMessage({
+            title: '5.3马上要来了，你知道吗',
+            desc: '这里是分享的内容，支持定向分享哦，快来体验海量Q粉吧！',
+            share_url: url,
+            share_type:0,
+            back: true,
+            sourceName: '个人定制',
+            toUin: 447189485,
+            uinType: 0,
+            // back: true,
+            image_url: 'http://dcloud.oa.com/Public/waltz/ck_img/1393900982.png'
+        }, function(result){
+            alert(JSON.stringify(result));
+            alert(result.retCode === 0 ? '分享成功' : ('分享失败, ret=' + result.retCode));
+        });
+    });
+    addButton('mqq.ui.shareMessage(QQ)', function() {
+        var ori = location.href;
+        var url = ori;
+
+        mqq.ui.shareMessage({
+            title: '5.3马上要来了，你知道吗',
+            desc: '这里是分享的内容，支持定向分享哦，快来体验海量Q粉吧！',
+            share_url: url,
+            share_type:0,
+            shareQQType: 1,
+            back: true,
+            sourceName: '个人定制',
+            // back: true,
+            image_url: 'http://dcloud.oa.com/Public/waltz/ck_img/1393900982.png'
+        }, function(result){
+            alert(JSON.stringify(result));
+            alert(result.retCode === 0 ? '分享成功' : ('分享失败, ret=' + result.retCode));
+        });
+    });
+
+
+    addButton('mqq.ui.shareMessage(群)', function() {
+        var ori = location.href;
+        var url = ori;
+
+        mqq.ui.shareMessage({
+            title: '5.3马上要来了，你知道吗',
+            desc: '这里是分享的内容，支持定向分享哦，快来体验海量Q粉吧！',
+            share_url: url,
+            share_type:0,
+            shareQQType: 4,
+            back: true,
+            sourceName: '个人定制',
+            // back: true,
+            image_url: 'http://dcloud.oa.com/Public/waltz/ck_img/1393900982.png'
+        }, function(result){
+            alert(JSON.stringify(result));
+            alert(result.retCode === 0 ? '分享成功' : ('分享失败, ret=' + result.retCode));
+        });
+    });
+
+    addButton('mqq.ui.shareMessage(微信)', function() {
+        var ori = location.href;
+        var url = ori;
+
+        mqq.ui.shareMessage({
+            title: '测试啊啊啊',
+            desc: '这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!',
+            share_url: url,
+            share_type: 2,
+            back: true,
+            image_url: 'http://e.hiphotos.baidu.com/image/w%3D310/sign=5cc49831b8a1cd1105b674218912c8b0/ac4bd11373f08202feb7ed3e49fbfbedab641b8d.jpg'
+        }, function(result){
+            alert(JSON.stringify(result));
+            alert(result.retCode === 0 ? '分享成功' : ('分享失败, ret=' + result.retCode));
+        });
+    });
+
+    addButton('mqq.ui.shareMessage(空间)', function() {
+        var ori = location.href;
+        var url = ori;
+
+        mqq.ui.shareMessage({
+            title: '测试啊啊啊',
+            desc: '这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!这是描述, 你看懂了么。haha哈哈啊!',
+            share_url: url,
+            share_type: 1,
+            back: false,
+            image_url: 'http://e.hiphotos.baidu.com/image/w%3D310/sign=5cc49831b8a1cd1105b674218912c8b0/ac4bd11373f08202feb7ed3e49fbfbedab641b8d.jpg'
+        }, function(result){
+            alert(JSON.stringify(result));
+            alert(result.retCode === 0 ? '分享成功' : ('分享失败, ret=' + result.retCode));
+        });
+    });
+
+    addButton('mqq.ui.shareRichMessage', function() {
+        var ori = location.href;
+        var url = ori.substr(0, ori.lastIndexOf('/')) + '/share.html';
+
+        mqq.ui.shareRichMessage({
+            oaUin: prompt('oaUin') || '2993576500',
+            title: prompt('title') || '测试啊啊啊',
+            summary: prompt('summary') || '这是描述, 你看懂了么',
+            targetUrl: url,
+            sourceName: prompt('sourceName') || '名字名字',
+            imageUrl: 'http://e.hiphotos.baidu.com/image/w%3D310/sign=5cc49831b8a1cd1105b674218912c8b0/ac4bd11373f08202feb7ed3e49fbfbedab641b8d.jpg'
+        }, function(result){
+            alert(JSON.stringify(result));
+            alert(result.ret === 0 ? '分享成功' : ('分享失败, ret=' + result.ret));
+        });
+    });
+
+    addButton('mqq.ui.showActionSheet', function() {
+        mqq.ui.showActionSheet({
+            'title' : 'title',
+            'items' : ['item1', 'item2'],
+            'cancel' : 'cancel',
+            'close' : 'close'
+        }, function(type, index){
+            alert('type: ' + type + ', index: ' + index);
+        });
+    });
+
+    addButton('setActionButton + showActionSheet', function() {
+        mqq.ui.setActionButton({title: '测试'}, function(){
+            //alert('你点击了测试按钮');
+            mqq.ui.showActionSheet({
+                'title' : 'title',
+                'items' : ['item1', 'item2'],
+                'cancel' : 'cancel',
+                'close' : 'close'
+            }, function(type, index){
+                alert('type: ' + type + ', index: ' + index);
+            });
+        });
+    });
+
+    addButton('mqq.ui.pageVisibility', function() {
+        mqq.ui.pageVisibility(function(result) {
+            alert('pageVisibility: ' + result);
+        });
+    });
+
+    addButton('listen qbrowserVisibilityChange event', function() {
+        document.addEventListener('qbrowserVisibilityChange', function(e){
+            alert('qbrowserVisibilityChange: hidden=' + e.hidden + ' at:' + new Date().toLocaleString());
+        }, false);
+    });
+
+    addButton('ui scanQRcode', function() {
+        mqq.ui.scanQRcode();
+    });
+
+    addButton('ui scanQRcode for result', function() {
+        mqq.ui.scanQRcode({}, function(result) {
+            alert(result);
+        });
+    });
+
+    addButton('ui selectContact for result', function() {
+        mqq.ui.selectContact({
+            appid: 100363349,
+            acceptType: 1,
+            maxSelect: 5,
+            callback: function(obj) {
+                alert(JSON.stringify(obj));
+            }
+        });
+    });
+
+    addButton('mqq.ui.showTips', function() {
+        mqq.ui.showTips({text: "hello"})
+    });
+
+    addButton('mqq.ui.showTips with icon', function() {
+        mqq.ui.showTips({
+            text: "hello",
+            type: "0",
+            hidden: "NO",
+            iconMode: "2"
+        });
+    });
+    // mqq.ui.showTips({text: "hello"})
+
+
+    addButton('mqq.ui.addShortcut', function() {
+        mqq.ui.addShortcut({
+            title: '兴趣部落',
+            icon: 'http://km.oa.com/files/groups/icons/18675.jpg',
+            url: 'http://xiaoqu.qq.com/mobile/index.html?_wv=1027&_bid=128&redid=0'
+        })
+    });
+    addButton('mqq.ui.showShareMenu', function() {
+        mqq.ui.showShareMenu({})
+    });
+    addButton('mqq.ui.closeWebViews', function() {
+        mqq.ui.closeWebViews({})
+    });
+    addButton('mqq.ui.closeWebViews({exclude: true})', function() {
+        mqq.ui.closeWebViews({exclude: true})
+    });
+
+    addSeparator();
+    
+    addButton('mqq.data.getWebRunEnv', function(){
+        mqq.data.getWebRunEnv(function(){
+            alert(JSON.stringify(arguments));
+        });
+    });
+
+    addButton('mqq.data.getPageLoadStamp', function(){
+        mqq.data.getPageLoadStamp(function(){
+            alert(JSON.stringify(arguments));
+        });
+    });
+
+    addButton('mqq.data.getPerformance', function(){
+        mqq.data.getPerformance(function(){
+            alert(JSON.stringify(arguments));
+        });
+    });
+
+    addButton('mqq.data.fetchJson', function() {
+        mqq.data.fetchJson({
+            url: 'http://s.web2.qq.com/api/getvfwebqq',
+            params: {},
+            options: {
+                method: 'GET'
+            }
+        }, function(result, context, statusCode){
+            alert(JSON.stringify(result));
+        });
+
+    });
+
+    addButton('mqq.data.getFriendInfo：single', function() {
+        mqq.data.getFriendInfo({
+            title: 'QQ好友选择器',
+            type: 1
+        }, function (ret) {
+            // [{uin:"5201313", phone: "18696969696", name: "小情人"}]
+            //console.log(JSON.stringify(ret));
+            alert(JSON.stringify(ret));
+        });
+
+    });
+    addButton('mqq.data.getFriendInfo：multi', function() {
+        mqq.data.getFriendInfo({
+            title: 'QQ好友选择器',
+            type: 1,
+            isMulti:true,
+            limitNum:3
+        }, function (ret) {
+            // [{uin:"5201313", phone: "18696969696", name: "小情人"}]
+            //console.log(JSON.stringify(ret));
+            alert(JSON.stringify(ret));
+        });
+
+    });
+    addButton('mqq.data.getFriendRemark', function() {
+        mqq.data.getFriendRemark({uins:["822991721"]}, function (ret) {
+            // {"822991721": "测试2号"}
+            alert(JSON.stringify(ret));
+        });
+    });
+     addButton('mqq.data.sendRequest: GET', function() {
+        mqq.data.sendRequest({
+            url: 'http://s.web2.qq.com/api/getvfwebqq',
+            params: {test: 123},
+            options: {
+                method: 'GET'
+            }
+        }, function(result, statusCode){
+            alert(result);
+        });
+
+    });
+
+    addButton('mqq.data.sendRequest: POST', function() {
+        mqq.data.sendRequest({
+            url: 'http://s.web2.qq.com/api/getvfwebqq',
+            params: {test: 123},
+            options: {
+                method: 'POST'
+            }
+        }, function(result, statusCode){
+            alert(result);
+        });
+
+    });
+
+    addButton('mqq.data.batchFetchOpenID', function() {
+        mqq.data.batchFetchOpenID({
+            appIDs: [100363349]
+        }, function(result, context, statusCode){
+            alert(JSON.stringify(result));
+        });
+
+    });
+
+    addButton('mqq.data.setShareURL', function() {
+        var url = 'http://pub.idqqimg.com/?sid=123455a&qq=sdfasd&3g_sid=324234#sid=kljalkdsjf;kyi';
+        alert('set to:' + url);
+        mqq.data.setShareURL({ url: url}, function(result) {
+            alert(result);
+        });
+    });
+/*
+    @param params {Object}
+    share_url: String     页面可以定制分享出去的url，去掉某些敏感参数等，如空，用页面url
+    title: String         分享的标题,必填
+    desc: String          分享的摘要,必填
+    image_url: String     图片URL
+*/
+    addButton('mqq.data.setShareInfo', function() {
+        var url = 'http://open.mobile.qq.com/sdk/qqapi.test.html?sid=123455asdfasd&wbv=1235&3g_sid=324234';
+
+        mqq.data.setShareInfo({
+            share_url: url,
+            title: '测试啊啊啊',
+            desc: '这是描述, 你看懂了么',
+            image_url: 'http://e.hiphotos.baidu.com/image/w%3D310/sign=5cc49831b8a1cd1105b674218912c8b0/ac4bd11373f08202feb7ed3e49fbfbedab641b8d.jpg'
+        }, function(result){
+            alert(JSON.stringify(result));
+        });
+    });
+
+    addButton('mqq.data.isFollowUin', function() {
+
+        mqq.data.isFollowUin({ uin: '2010741172' }, function(result) {
+            alert(JSON.stringify(result));
+        });
+    });
+
+    /*addButton('mqq.data.followUin', function() {
+
+        mqq.data.followUin({ uin: '2010741172' }, function(result) {
+            alert(JSON.stringify(result));
+        });
+    });*/
+
+
+    addButton('mqq.data.readH5Data', function() {
+        // callid: String    // 用来标示请求id, 返回时把该值传回
+        // host: String  // 如果host不为空, 且是该页面的域名的父域名, 则往host写, 如果为空则往页面的域名写, 其他为错误
+        // path: String  // 区分业务
+        // key: String     // 数据对应的key
+        /*mqq.data.readH5Data({
+            callid: '1',
+            host: '',
+            path: 'test',
+            key: 'abc'
+        }, function(data) {
+            $log.innerText = JSON.stringify(data);
+            // alert(JSON.stringify(data));
+        });*/
+        mqq.data.readH5Data({
+            callid: '2',
+            host: '',
+            path: 'test',
+            key: 'cba'
+        }, function(data) {
+            // mqq.firebug.log(data)
+            // $log.innerText = JSON.stringify(data);
+            alert(JSON.stringify(data));
+        });
+    });
+    /*mqq.data.writeH5Data({
+        callid: 2,
+        path: 'test',
+        key: 'cba',
+        data: {name: "jdo"}
+    }, function(data) {
+        alert(JSON.stringify(data));
+    });
+    mqq.data.readH5Data({
+        callid: '2',
+        host: '',
+        path: 'test',
+        key: 'cba'
+    }, function(data) {
+        alert(JSON.stringify(data))
+    });
+    mqq.data.deleteH5Data({
+        callid: 2,
+        path: 'test',
+        key: 'cba'
+    }, function(data) {
+        alert(JSON.stringify(data));
+    });
+    mqq.data.readH5Data({
+        callid: '2',
+        host: '',
+        path: 'test',
+        key: 'cba'
+    }, function(data) {
+        alert(JSON.stringify(data))
+    });*/
+
+    addButton('mqq.data.writeH5Data', function() {
+        /*
+          @param params {Object}
+          callid: String    // 用来标示请求id, 返回时把该值传回
+          host: String  // 如果host不为空, 且是该页面的域名的父域名, 则往host写, 如果为空则往页面的域名写, 其他为错误
+          path: String  // 区分业务
+          key: String     // 数据对应的key
+          data: String    // 数据
+        */
+        /*mqq.data.writeH5Data({
+            callid: 1,
+            path: 'test',
+            key: 'abc',
+            data: 'xxxxxxx+'
+        }, function(data) {
+            $log.innerText = JSON.stringify(data);
+            // alert(JSON.stringify(data));
+        });*/
+
+        mqq.data.writeH5Data({
+            callid: 2,
+            path: 'test',
+            key: 'cba',
+            data: {name: "jdo"}
+        }, function(data) {
+            // mqq.firebug.log(data)
+            // $log.innerText = JSON.stringify(data);
+            alert(JSON.stringify(data));
+        });
+    });
+    addButton('mqq.data.deleteH5Data', function() {
+        /*
+          @param params {Object}
+          callid: String    // 用来标示请求id, 返回时把该值传回
+          host: String  // 如果host不为空, 且是该页面的域名的父域名, 则往host写, 如果为空则往页面的域名写, 其他为错误
+          path: String  // 区分业务
+          key: String     // 数据对应的key
+          data: String    // 数据
+        */
+        /*mqq.data.deleteH5Data({
+            callid: 1,
+            path: 'test',
+            key: 'abc'
+        }, function(data) {
+            // alert(JSON.stringify(data));
+        });*/
+        mqq.data.deleteH5Data({
+            callid: 2,
+            path: 'test',
+            key: 'cba'
+        }/*, function(data) {
+            // mqq.firebug.log(data)
+            // $log.innerText = JSON.stringify(data);
+            alert(JSON.stringify(data));
+        }*/);
+    });
+
+    addButton('mqq.data.deleteH5DataByHost', function() {
+        /*
+          @param params {Object}
+          callid: String    // 用来标示请求id, 返回时把该值传回
+          host: String  // 如果host不为空, 且是该页面的域名的父域名, 则往host写, 如果为空则往页面的域名写, 其他为错误
+          path: String  // 区分业务
+          key: String     // 数据对应的key
+          data: String    // 数据
+        */
+        mqq.data.deleteH5DataByHost({
+            callid: 1,
+            host: ''
+        }, function(data) {
+            alert(JSON.stringify(data));
+        });
+    });
+
+    addButton('mqq.data.getUrlImage', function() {
+
+        mqq.data.getUrlImage({
+            callid: 1,
+            url: 'http://e.hiphotos.baidu.com/image/w%3D310/sign=5cc49831b8a1cd1105b674218912c8b0/ac4bd11373f08202feb7ed3e49fbfbedab641b8d.jpg'
+        }, function(data) {
+            if(data.ret == 0){
+                alert('downloaded');
+                img.src = data.response.data;
+            }else if(data.ret == 1){
+                console.log('downloading');
+            }
+        });
+    });
+
+    addButton('mqq.data.getUserInfo', function() {
+
+        mqq.data.getUserInfo(function(data) {
+            alert(JSON.stringify(data));
+        });
+    });
+
+    addButton('mqq.data.setClipboard', function() {
+
+        mqq.data.setClipboard({
+            text: '我是被复制的内容'
+        },function(ret){
+            alert(ret);
+            alert(ret?'复制成功':'复制失败');
+            // mqq.ui.showTips({
+            //     text: ret?'复制成功':'复制失败'
+            // })
+        });
+    });
+
+    addButton('mqq.data.getClipboard', function() {
+        mqq.data.getClipboard(function(ret){
+            alert(ret);
+            // mqq.ui.showTips({
+            //     text: ret
+            // })
+        })
+    })
+
+    addSeparator();
+
+    addButton('mqq.sensor.getLocation:cache', function() {
+        mqq.sensor.getLocation({allowCacheTime:60}, function(retCode, longitude, latitude, status) {
+            alert('retCode: ' + retCode + ', longitude=' + longitude + ', latitude=' + latitude);
+        });
+    });
+
+    addButton('mqq.sensor.getLocation', function() {
+        mqq.sensor.getLocation(function(retCode, longitude, latitude, status) {
+            alert('retCode: ' + retCode + ', longitude=' + longitude + ', latitude=' + latitude);
+        });
+    });
+
+    addButton('mqq.sensor.getSensorStatus', function() {
+        mqq.sensor.getSensorStatus({type: 'gps'}, function(ret, status) {
+            alert('ret: ' + ret + ','+ JSON.stringify(status));
+        });
+    });
+
+    addButton('mqq.sensor.getRealLocation', function() {
+        mqq.sensor.getRealLocation(null, function(retCode, data) {
+            alert('retCode: ' + retCode + ', data=' + JSON.stringify(data));
+        });
+    });
+
+    addButton('mqq.sensor.vibrate', function() {
+        mqq.sensor.vibrate({time: 1000});
+    });
+
+    var a = 0, time = 250;
+    addButton('mqq.sensor.startAccelerometer', function() {
+        var reta, xa, ya, za;
+        var func = function(){ // 250 ms 更新一次显示, 防止卡死
+            MQQfirebug.log({
+                reta : reta,
+                xa : xa,
+                ya : ya,
+                za : za
+            });
+            a = setTimeout(func, time);
+        };
+        a = setTimeout(func, time);
+        mqq.sensor.startAccelerometer(function(ret, x, y, z){
+            reta = ret;
+            xa = x;
+            ya = y;
+            za = z;
+        });
+    });
+
+    addButton('mqq.sensor.stopAccelerometer', function() {
+        mqq.sensor.stopAccelerometer();
+        log('stopAccelerometer');
+        clearTimeout(a);
+    });
+
+    addButton('mqq.sensor.startCompass', function() {
+        var reta, dira;
+        var func = function(){ // 250 ms 更新一次显示, 防止卡死
+            log('startCompass', reta, 'direction', dira);
+            a = setTimeout(func, time);
+        };
+        a = setTimeout(func, time);
+        mqq.sensor.startCompass(function(ret, direction){
+            reta = ret;
+            dira = direction;
+        });
+    });
+
+    addButton('mqq.sensor.stopCompass', function() {
+        mqq.sensor.stopCompass();
+        log('stopCompass');
+        clearTimeout(a);
+    });
+
+    addButton('mqq.sensor.startListen', function() {
+        /*var reta, vola;
+        var func = function(){ // 250 ms 更新一次显示, 防止卡死
+            log('startListen', reta, ', volume: ' + vola);
+            a = setTimeout(func, time);
+        };
+        a = setTimeout(func, time);*/
+        // alert(mqq.firefox)
+        mqq.sensor.startListen(function(result, volume){
+            mqq.firebug.log({volume : volume})
+
+            /*reta = result;
+            vola = volume;*/
+        });
+    });
+
+    addButton('mqq.sensor.stopListen', function() {
+        mqq.sensor.stopListen();
+        log('stopListen');
+        clearTimeout(a);
+    });
+
+    addSeparator();
+
+    addButton('mqq.offline.isCached', function() {
+        mqq.offline.isCached({bid: 128}, function(result){
+            if(result === -1){
+                alert('没有离线包');
+            }else{
+                alert('离线包版本是：' + result);
+            }
+        });
+    });
+    addButton('mqq.offline.clearCache', function() {
+        mqq.offline.clearCache({bid: 128}, function(result){
+            if ( result.retcode === 0 ) alert('设置成功');
+        });
+    });
+    addButton('mqq.offline.disableCache', function() {
+        mqq.offline.disableCache(function(result){
+            if ( result.retcode === 0 ) alert('设置成功');
+        });
+    });
+    addButton('mqq.offline.batchCheckUpdate', function() {
+        mqq.offline.batchCheckUpdate({bids: [108, 152]}, function(result){
+            if ( result.retcode === 0 ) {
+                alert(result.data)
+            }
+        });
+    });
+    var updateResult = null;
+    addButton('mqq.offline.checkUpdate', function() {
+        mqq.offline.checkUpdate({bid: 152}, function(dat){
+            alert(JSON.stringify(dat))
+            updateResult = dat;
+            alert(JSON.stringify(updateResult));
+        });
+    });
+    addButton('mqq.offline.downloadUpdate', function() {
+        // alert(JSON.stringify(updateResult))
+        var params = {bid: 152};
+        if(updateResult){
+            params.url = updateResult.url;
+            // params.fileSize = updateResult.filesize;
+        }
+        mqq.offline.downloadUpdate(params, function(result){
+            if(result === 0){
+                alert('下载成功');
+            }else{
+                alert('下载失败');
+            }
+        });
+    });
+
+    addSeparator();
+
+    addButton('mqq.pay.pay', function() {
+        mqq.pay.pay({
+            param: {
+                qq_product_name     : '绿钻豪华版',
+                pf                  : 'openmobile_ios-2001-iap-profile',
+                pfkey               : 'pfKey',
+                product_id          : 'com.tencent.mqq.musicsvip.nonrenewing.12month',
+                product_type        : 4,
+                quantity            : 1,
+                is_deposit_game_coin: 0,
+                pay_item            : '1',
+                var_item            : 'from=qyourprofile&id=com.tencent.mqq.musicsvip.nonrenewing.6months&aid=jhiso_zilioka',
+                apple_pay_source    : 'vip_center',
+                app_id              : '1450000894'
+            },
+            callback: function(resultCode, retmsg){
+                alert(resultCode + '\n' + retmsg);
+            }
+        });
+    });
+
+    addButton('mqq.tenpay.pay', function() {
+        mqq.tenpay.pay({ tokenID: 123455 }, function(code, data){
+            alert('code: ' + JSON.stringify(code) + ' ,data: ' + data);
+        });
+    });
+    addButton('mqq.tenpay.openService', function() {
+        mqq.tenpay.openService({ }, function(data){
+            alert(data);
+        });
+    });
+
+    addSeparator();
+
+    addButton('mqq.media.getPicture相册', function() {
+        mqq.media.getPicture({
+            source:0,
+            max:5,
+            outMaxWidth:480,
+            outMaxHeight:480,
+			inMinWidth: 300,
+			inMinHeight: 300
+        },function(code, data){
+                // var ret = [];
+                alert(code);
+                alert(data);
+                alert('code: ' + code + ", data.length: " + data.length);
+                if (code == 0 && data.length > 0) {
+                    var arr = [];
+                    for(var i in data[0]){
+                        arr.push(i);
+                    }
+                    alert(arr.join(','));
+                    img.src = data[0].data;
+                }
+                // for (var i=0,len=data.length;i<len;i++){
+                //     ret.push(data[i].ret);
+                // }
+                // alert('code: ' + code + ' ,data: ' + ret);
+                // if (code == 0 && data.length > 0 && data[0].ret == 0) {
+                //     img.src = data[0].data;
+                // }
+
+        });
+
+    });
+
+    addButton('mqq.media.getPicture摄像头', function() {
+        mqq.media.getPicture({
+            source:1,
+            front:true,
+            outMaxWidth:480,
+            outMaxHeight:480,
+			inMinWidth: 300,
+			inMinHeight: 300
+        },function(code, data){
+                alert('code: ' + code + ", data.length: " + data.length);
+                if (code == 0 && data.length > 0) {
+                    var arr = [];
+                    for(var i in data[0]){
+                        arr.push(i);
+                    }
+                    alert(arr.join(','));
+                    img.src = data[0].data;
+                }
+                // if (code == 0 && data.length > 0 && data[0].ret == 0) {
+                //     img.src = data[0].data;
+                // }
+                // var ret = [];
+                // for (var i=0,len=data.length;i<len;i++){
+                //     ret.push(data[i].ret);
+                // }
+                // alert('code: ' + code + ' ,data: ' + ret);
+                // if (code == 0 && data.length > 0 && data[0].ret == 0) {
+                //     img.src = data[0].data;
+                // }
+
+        });
+    });
+
+    addSeparator();
+
+    addButton('mqq.media.getPicture + mqq.media.getLocalImage', function() {
+        mqq.media.getPicture({
+            source:0,
+            max:5,
+            urlOnly:true
+        },function(code, data){
+            alert('code: ' + code + ", data: " + JSON.stringify(data));
+            if (code == 0 && data.length > 0) {
+                for(var i = 0, len = data.length; i < len; i++){
+                    mqq.invoke('media', 'getLocalImage', {
+                        outMaxWidth:480,
+                        outMaxHeight:480,
+                        inMinWidth: 300,
+                        inMinHeight: 300,
+                        imageID: data[i].imageID,
+                        callback: mqq.callback(function(ret, image){
+                            if (ret == 0) {
+                                var img = new Image();
+                                img.src = image.data;
+                                document.body.appendChild(img);
+                            }
+                        })
+                    });
+                }
+            }
+        });
+
+    });
+
+    addButton('bad mqq.media.getLocalImage', function() {
+        /*mqq.media.getLocalImage({
+            outMaxWidth:480,
+            outMaxHeight:480,
+            inMinWidth: 300,
+            inMinHeight: 300,
+            imageID: '/sdcard/webview.db2'
+        },function(ret, image){
+            alert('code: ' + ret + ", data: " + JSON.stringify(image));
+        });*/
+        mqq.invoke('media', 'getLocalImage', {
+            outMaxWidth:480,
+            outMaxHeight:480,
+            inMinWidth: 300,
+            inMinHeight: 300,
+            imageID: '/sdcard/webview.db2',
+            callback: mqq.callback(function(ret, image){
+                alert('code: ' + ret + ", data: " + JSON.stringify(image));
+            })
+        });
+
+    });
+
+    addButton('mqq.invokeURL', function() {
+        mqq.app.launchApp({name:'bitauto.yicheapp://yiche.app/medianews.xiangqing?id=33750&clickid=6fjfcvyhaaafmz7udntq'});
+
+    });
+
+    addButton('mqq.invokeURL2', function() {
+        mqq.app.launchApp('bitauto.yicheapp://yiche.app/medianews.xiangqing?id=33750&clickid=6fjfcvyhaaafmz7udntq');
+
+    });
+
+
+    addButton('mqq.media.saveImage', function() {
+        mqq.media.saveImage({
+            content: 'http://c.hiphotos.baidu.com/image/pic/item/55e736d12f2eb93839a69035d7628535e4dd6f2a.jpg'
+        }, mqq.callback(function(data){
+            alert(JSON.stringify(arguments))
+            if(data.retCode === 0){
+                mqq.media.getLocalImage({
+                    imageID: data.imageID
+                }, function(ret, image){
+                    if (ret == 0) {
+                        var img = new Image();
+                        img.src = image.data;
+                        document.body.appendChild(img);
+                    }
+                });
+            }
+
+        }, false, true));
+
+    });
+
+    addButton('mqq.media.showPicture', function () {
+        mqq.media.showPicture({
+            imageIDs : [
+                "http://pub.idqqimg.com/qqmobile/pic/b1.jpg",
+                "http://pub.idqqimg.com/qqmobile/pic/b2.jpg",
+                "http://pub.idqqimg.com/qqmobile/pic/b3.jpg",
+                "http://pub.idqqimg.com/qqmobile/pic/b4.jpg"
+            ],
+            index : 2,
+            srcID : 0
+            // isNotShowIndex : false
+        })
+    });
+
+    addButton('get qbrowserCount', function() {
+        mqq.invoke('data', 'getSharedData', {
+            callback: mqq.callback(function(count){
+                alert(count);
+            })
+        });
+        mqq.invoke('data', 'getSharedData', {
+            key: 'qbrowserCount',
+            callback: mqq.callback(function(count){
+                alert(JSON.stringify(count));
+            })
+        });
+
+    });
+
+    addSeparator();
+
+    addButton('生成桌面快捷方式', function() {
+        mqq.ui.addShortcut({
+            action: 'web',
+            title: '兴趣部落',
+            icon: 'xiaoqu.qq.com/mobile/f',
+            url: 'xiaoqu.qq.com/mobile/index.html?_wv=1027&_bid=128&redid=0',
+            callback: function (ret) {
+                alert(ret.result)
+            }
+        });
+    });
+
+    addButton('分享QQ充值消息--成功', function() {
+        mqq.ui.shareRichMessage({
+            'oaUin': '1900590031',
+            'title': 'native分享',
+            'summary': 'native分享些什么好呢?',
+            'targetUrl': 'http://news.qq.com/a/20140104/003852.htm',
+            'imageUrl': 'http://img1.gtimg.com/news/pics/hv1/145/166/1494/97189825.jpg',
+            'back': true
+        },
+        function(result){
+            alert('officalAccountShareRichMsg2QQ: ' + JSON.stringify(result));
+        });
+    });
+    addButton('分享QQ充值消息--失败', function() {
+        mqq.ui.shareRichMessage({
+            'oaUin': '1900590031',
+            'summary': 'native分享些什么好呢?',
+            'targetUrl': 'http://news.qq.com/a/20140104/003852.htm',
+            'imageUrl': 'http://img1.gtimg.com/news/pics/hv1/145/166/1494/97189825.jpg',
+            'back': true
+        },
+        function(result){
+            alert('officalAccountShareRichMsg2QQ: ' + JSON.stringify(result));
+        });
+    });
+    addButton('分享QQ充值消息--2行', function() {
+        mqq.ui.shareRichMessage({
+            'oaUin': '1900590031',
+            'title': 'native分享，见惯了“我爱你”、“',
+            'summary': 'native分享些什么好呢?这首情诗把数学语言与ab',
+            'targetUrl': 'http://news.qq.com/a/20140104/003852.htm',
+            'imageUrl': 'http://img1.gtimg.com/news/pics/hv1/145/166/1494/97189825.jpg',
+            'back': false
+        },
+        function(result){
+            alert('officalAccountShareRichMsg2QQ: ' + JSON.stringify(result));
+        });
+    });
+    addButton('分享QQ充值消息--超过2行', function() {
+        mqq.ui.shareRichMessage({
+            'oaUin': '1900590031',
+            'title': 'native分享，见惯了“我爱你”、“ILOVEYOU”等示爱方式，你是否会感到审美疲劳',
+            'summary': 'native分享些什么好呢?这首情诗把数学语言与文学相结合，表达了双方不离不弃的陪伴，牵着彼此的手走到生命的尽头之意。高端大气上档次，一般人真写不来！',
+            'targetUrl': 'http://news.qq.com/a/20140104/003852.htm',
+            'imageUrl': 'http://img1.gtimg.com/news/pics/hv1/145/166/1494/97189825.jpg'
+        },
+        function(result){
+            alert('officalAccountShareRichMsg2QQ: ' + JSON.stringify(result));
+        });
+    });
+    addButton('分享QQ充值消息--超过2行', function() {
+        mqq.invoke('QQApi', 'shareMsg', {
+            'title': 'native分享，见惯了“我爱你”、“ILOVEYOU”等示爱方式，你是否会感到审美疲劳',
+            'desc': 'native分享些什么好呢?这首情诗把数学语言与文学相结合，表达了双方不离不弃的陪伴，牵着彼此的手走到生命的尽头之意。高端大气上档次，一般人真写不来！',
+            'share_url': 'http://news.qq.com/a/20140104/003852.htm',
+            'image_url': 'http://www.baidu.com',
+            'share_type': 2
+        });
+    });
+
+    addButton('selectContact', function() {
+        mqq.invoke('ui', 'selectContact', {
+            appid: 100363349, //必填
+            acceptType: 3, // 1好友, 4群, 8讨论组; 同时接收多种类型时, 把值相加, 默认13
+            maxSelect: 5, //选择上限, 仅当类型为好友时允许多选, 默认1
+            callback: mqq.callback(function(obj) {
+                alert(JSON.stringify(obj));
+            })
+        });
+    });
+
+    addSeparator();
+
+    var input1 = document.createElement('input');
+    input1.setAttribute('type', 'text');
+    input1.value = '请输入群号';
+    container.appendChild(input1);
+
+    var btn1 = document.createElement('button');
+    btn1.setAttribute('class', 'btn btn-primary');
+    btn1.innerHTML = "ios:aioorchat(inner)";
+    btn1.onclick = function(){
+    	var uin = input1.value;
+    	mqq.invoke("nav", "openGroupAioOrProfile", {"uin" : uin});
+    };
+    container.appendChild(btn1);
+
+    var btn2 = document.createElement('button');
+    btn2.setAttribute('class', 'btn btn-primary');
+    btn2.innerHTML = "ios:aioorchat(outer)";
+    btn2.onclick = function(){
+    	var uin = input1.value;
+    	location.href = "mqqapi://group/aioorprofile?src_type=internal&version=1&uin=" + uin;
+    };
+    container.appendChild(btn2);
+
+    var btn3 = document.createElement('button');
+    btn3.setAttribute('class', 'btn btn-primary');
+    btn3.innerHTML = "android:aioorchat(inner)";
+    btn3.onclick = function(){
+    	var uin = input1.value;
+    	mqq.invoke("im", "aioorprofile", {"uin" : uin})
+    };
+    container.appendChild(btn3);
+
+    var btn4 = document.createElement('button');
+    btn4.setAttribute('class', 'btn btn-primary');
+    btn4.innerHTML = "android:aioorchat(outer)";
+    btn4.onclick = function(){
+    	var uin = input1.value;
+    	location.href = "mqqapi://im/aioorprofile?src_type=internal&version=2&uin=" + uin + "&jump_from=h5";
+    };
+    container.appendChild(btn4);
+
+    addSeparator();
+
+    var input2 = document.createElement('input');
+    input2.setAttribute('type', 'text');
+    input2.value = '请输入群类型[0,1,2]';
+    container.appendChild(input2);
+
+    var btn5 = document.createElement('button');
+    btn5.setAttribute('class', 'btn btn-primary');
+    btn5.innerHTML = "ios:creategroup(inner)";
+    btn5.onclick = function(){
+    	var type = input2.value;
+    	mqq.invoke("nav", "createGroup", {"initgrouptype" : type})
+    };
+    container.appendChild(btn5);
+
+    var btn6 = document.createElement('button');
+    btn6.setAttribute('class', 'btn btn-primary');
+    btn6.innerHTML = "ios:creategroup(outer)";
+    btn6.onclick = function(){
+    	var type = input2.value;
+    	location.href = "mqqapi://group/create?src_type=internal&version=1&initgrouptype=" + type + "&jump_from=h5";
+    };
+    container.appendChild(btn6);
+
+    var btn7 = document.createElement('button');
+    btn7.setAttribute('class', 'btn btn-primary');
+    btn7.innerHTML = "android:creategroup(inner)";
+    btn7.onclick = function(){
+    	var type = input2.value;
+    	mqq.invoke("group", "creategroup", {"initgrouptype" : type})
+    };
+    container.appendChild(btn7);
+
+    var btn8 = document.createElement('button');
+    btn8.setAttribute('class', 'btn btn-primary');
+    btn8.innerHTML = "android:creategroup(outer)";
+    btn8.onclick = function(){
+    	var type = input2.value;
+    	location.href = "mqqapi://group/creategroup?src_type=internal&version=2&initgrouptype=" + type + "&jump_from=h5";
+    };
+    container.appendChild(btn8);
+
+    addSeparator();
+
+    addButton('mqq.device.getTraceRouteStatus', function() {
+        mqq.invoke('device', 'getTraceRouteStatus', {
+            host: 'www.qq.com'
+        }, function(result){
+            // alert(JSON.stringify(result));
+            // alert(result.retCode === 0 ? '分享成功' : ('分享失败, ret=' + result.retCode));
+        });
+    });
+    addButton('mqq.device.getPingStatus', function() {
+        mqq.invoke('device', 'getPingStatus', {
+            host: 'www.qq.com',
+            pingPacketsNum: 10
+        }, function(result){
+            // alert('ddodod')
+            // mqq.firebug.log(result)
+            // alert(JSON.stringify(result));
+            // alert(result.retCode === 0 ? '分享成功' : ('分享失败, ret=' + result.retCode));
+        });
+    });
+
+    addSeparator();
+
+    addButton('_wv=33554432', function() {
+        mqq.ui.openUrl({
+            url : '',
+            target : 1
+        })
+    });
+
+    addSeparator();
+
+    addButton('invoke:ui.setPullDown', function() {
+        mqq.invoke('ui', 'setPullDown', {enable:true})
+    });
+
+    addSeparator();
+
+    addButton('invoke:ui.openUrl', function() {
+        mqq.invoke('ui', 'openUrl', {
+            url: 'http://buluo.qq.com/mobile/index.html?_wv=1027&_bid=128&redid=0',
+            target: 1
+        });
+    });
+
+    addSeparator();
+
+    addButton('invoke:ui.shareMessage', function() {
+        var ori = location.href;
+        var url = ori;
+
+        mqq.invoke('ui', 'shareMessage', {
+            title: '5.3马上要来了，你知道吗',
+            desc: '这里是分享的内容，支持定向分享哦，快来体验海量Q粉吧！',
+            share_url: url,
+            share_type:0,
+            back: true,
+            sourceName: '个人定制',
+            // toUin: 289623053,
+            // uinType: 0,
+            // back: true,
+            image_url: 'http://dcloud.oa.com/Public/waltz/ck_img/1393900982.png'
+        }, function(result){
+            alert(JSON.stringify(result));
+            alert(result.retCode === 0 ? '分享成功' : ('分享失败, ret=' + result.retCode));
+        })
+    });
+
+    addSeparator();
+
+    addButton('mqq.debug.detailLog', function() {
+        var startT = +new Date(),
+            endT;
+        mqq.debug.detailLog({id:"qqshow",subid:"get001",content:"test detail log"});
+        endT = +new Date();
+        alert("请求提交，耗时："+(endT-startT));
+    });
+
+}();
+</script>
